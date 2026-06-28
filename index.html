@@ -670,6 +670,7 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
     try {
       const cred = await signInWithEmailAndPassword(auth, email, pass);
       window.jsgCurrentUser = cred.user;
+      alert('LOGIN OK — uid: ' + cred.user.uid);
       window.jsgCpShowDashboard(cred.user);
     } catch(e) {
       errEl.textContent = e.code === 'auth/invalid-credential' ? 'Wrong email or password.' : e.message;
