@@ -672,55 +672,64 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
     try {
       const cred = await signInWithEmailAndPassword(auth, email, pass);
       window.jsgCurrentUser = cred.user;
-      const u = cred.user;
 
-      // Show dashboard
-      document.getElementById('cpAuthBox').style.display = 'none';
-      document.getElementById('cpDashboard').style.display = 'block';
-
-      // Get client name
-      try {
-        const clientDoc = await getDoc(doc(db, 'clients', u.uid));
-        if (clientDoc.exists()) document.getElementById('cpUserName').textContent = clientDoc.data().name || u.email;
-        else document.getElementById('cpUserName').textContent = u.email;
-      } catch(e2) { document.getElementById('cpUserName').textContent = u.email; }
-
-      // Load projects
-      const projectsEl = document.getElementById('cpProjectsList');
-      const noProj = document.getElementById('cpNoProjects');
-      try {
-        const q = query(collection(db, 'projects'), where('clientUid', '==', u.uid));
-        const snap = await getDocs(q);
-        alert('PROJECTS: ' + snap.size + ' found for uid: ' + u.uid);
-        if (snap.empty) { noProj.style.display = 'block'; return; }
-        noProj.style.display = 'none';
-        const statusColors = { running:'#4A90D9', completed:'#5B8F5B', pending:'#C7972C', cancelled:'#E05050' };
-        const statusLabels = { running:'🔵 In Progress', completed:'✅ Completed', pending:'⏳ Pending', cancelled:'❌ Cancelled' };
-        let html = '';
-        snap.forEach(d => {
-          const p = d.data();
-          const paid = Number(p.paid)||0, total = Number(p.amount)||0;
-          const pct = total > 0 ? Math.min(100, Math.round(paid/total*100)) : 0;
-          const prog = p.progress || 0;
-          html += `<div style="background:#1B2026;border-radius:8px;padding:18px;border-left:3px solid ${statusColors[p.status]||'#3D454D'};margin-bottom:12px;">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-              <div><div style="color:#F4F1E8;font-weight:600;font-size:15px;">${p.project||'Project'}</div>
-              <div style="font-size:12px;color:#6B7480;margin-top:2px;">${p.startDate||''}</div></div>
-              <span style="font-size:11px;padding:3px 8px;background:${statusColors[p.status]||'#3D454D'}22;color:${statusColors[p.status]||'#6B7480'};border-radius:3px;">${statusLabels[p.status]||p.status}</span>
-            </div>
-            <div style="margin-bottom:10px;">
-              <div style="display:flex;justify-content:space-between;font-size:12px;color:#6B7480;margin-bottom:4px;"><span>Work Progress</span><span>${prog}%</span></div>
-              <div style="background:#252C35;border-radius:3px;height:6px;"><div style="background:#C7972C;height:6px;border-radius:3px;width:${prog}%;"></div></div>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:13px;">
-              <div><span style="color:#6B7480;">Total: </span><span style="color:#F4F1E8;font-weight:600;">₹${total.toLocaleString('en-IN')}</span></div>
-              <div><span style="color:#6B7480;">Paid: </span><span style="color:${pct>=100?'#5B8F5B':'#E05050'};font-weight:600;">₹${paid.toLocaleString('en-IN')} (${pct}%)</span></div>
-            </div>
-            ${p.notes ? `<div style="margin-top:10px;font-size:12px;color:#6B7480;border-top:1px solid #252C35;padding-top:10px;">${p.notes}</div>` : ''}
-          </div>`;
-        });
-        projectsEl.innerHTML = html;
-      } catch(e3) { alert('Query error: ' + e3.message); }
+      if (email === 'ajeet9008423323@gmail.com') {
+        // OWNER — close client portal, open owner dashboard
+        document.getElementById('clientPortalOverlay').style.display = 'none';
+        document.body.style.overflow = 'hidden';
+        document.getElementById('ownerDashOverlay').style.display = 'block';
+        document.getElementById('dashLoginBox').style.display = 'none';
+        document.getElementById('dashContent').style.display = 'block';
+        if (window.renderDashboard) window.renderDashboard();
+        if (window.jsgLoadFirebaseProjects) window.jsgLoadFirebaseProjects();
+        if (window.jsgLoadClients) window.jsgLoadClients();
+      } else {
+        // CLIENT — show client dashboard
+        const u = cred.user;
+        document.getElementById('cpAuthBox').style.display = 'none';
+        document.getElementById('cpDashboard').style.display = 'block';
+        try {
+          const clientDoc = await getDoc(doc(db, 'clients', u.uid));
+          if (clientDoc.exists()) document.getElementById('cpUserName').textContent = clientDoc.data().name || u.email;
+          else document.getElementById('cpUserName').textContent = u.email;
+        } catch(e2) { document.getElementById('cpUserName').textContent = u.email; }
+        const projectsEl = document.getElementById('cpProjectsList');
+        const noProj = document.getElementById('cpNoProjects');
+        try {
+          const q = query(collection(db, 'projects'), where('clientUid', '==', u.uid));
+          const snap = await getDocs(q);
+          if (snap.empty) { noProj.style.display = 'block'; }
+          else {
+            noProj.style.display = 'none';
+            const statusColors = { running:'#4A90D9', completed:'#5B8F5B', pending:'#C7972C', cancelled:'#E05050' };
+            const statusLabels = { running:'🔵 In Progress', completed:'✅ Completed', pending:'⏳ Pending', cancelled:'❌ Cancelled' };
+            let html = '';
+            snap.forEach(d => {
+              const p = d.data();
+              const paid = Number(p.paid)||0, total = Number(p.amount)||0;
+              const pct = total > 0 ? Math.min(100, Math.round(paid/total*100)) : 0;
+              const prog = p.progress || 0;
+              html += `<div style="background:#1B2026;border-radius:8px;padding:18px;border-left:3px solid ${statusColors[p.status]||'#3D454D'};margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                  <div><div style="color:#F4F1E8;font-weight:600;font-size:15px;">${p.project||'Project'}</div>
+                  <div style="font-size:12px;color:#6B7480;margin-top:2px;">${p.startDate||''}</div></div>
+                  <span style="font-size:11px;padding:3px 8px;background:${statusColors[p.status]||'#3D454D'}22;color:${statusColors[p.status]||'#6B7480'};border-radius:3px;">${statusLabels[p.status]||p.status}</span>
+                </div>
+                <div style="margin-bottom:10px;">
+                  <div style="display:flex;justify-content:space-between;font-size:12px;color:#6B7480;margin-bottom:4px;"><span>Work Progress</span><span>${prog}%</span></div>
+                  <div style="background:#252C35;border-radius:3px;height:6px;"><div style="background:#C7972C;height:6px;border-radius:3px;width:${prog}%;"></div></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;">
+                  <div><span style="color:#6B7480;">Total: </span><span style="color:#F4F1E8;font-weight:600;">₹${total.toLocaleString('en-IN')}</span></div>
+                  <div><span style="color:#6B7480;">Paid: </span><span style="color:${pct>=100?'#5B8F5B':'#E05050'};font-weight:600;">₹${paid.toLocaleString('en-IN')} (${pct}%)</span></div>
+                </div>
+                ${p.notes ? `<div style="margin-top:10px;font-size:12px;color:#6B7480;border-top:1px solid #252C35;padding-top:10px;">${p.notes}</div>` : ''}
+              </div>`;
+            });
+            projectsEl.innerHTML = html;
+          }
+        } catch(e3) { noProj.style.display = 'block'; }
+      }
     } catch(e) {
       errEl.textContent = e.code === 'auth/invalid-credential' ? 'Wrong email or password.' : e.message;
       errEl.style.display = 'block';
@@ -975,34 +984,35 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
   // OWNER LOGOUT
   window.jsgOwnerLogout = async function() {
     try { await signOut(auth); } catch(e) {}
+    window.jsgCurrentUser = null;
     document.getElementById('dashContent').style.display = 'none';
     document.getElementById('dashLoginBox').style.display = 'block';
-    document.getElementById('dashPin').value = '';
     document.getElementById('dashOwnerPass').value = '';
     document.getElementById('dashLoginErr').style.display = 'none';
   };
 
   window.jsgOwnerLogin = async function() {
-    var pin = document.getElementById('dashPin').value.trim();
+    var email = document.getElementById('dashOwnerEmail').value.trim();
     var pass = document.getElementById('dashOwnerPass').value;
     var errEl = document.getElementById('dashLoginErr');
     var btn = document.getElementById('dashLoginBtn');
-    if (pin !== '9008') {
-      errEl.textContent = 'Wrong PIN. Try again.';
-      errEl.style.display = 'block';
-      document.getElementById('dashPin').value = '';
-      return;
-    }
-    if (!pass) {
-      errEl.textContent = 'Please enter your Firebase password.';
+    if (!email || !pass) {
+      errEl.textContent = 'Email aur password dono daalo.';
       errEl.style.display = 'block';
       return;
     }
     btn.textContent = 'Signing in...'; btn.disabled = true;
     errEl.style.display = 'none';
     try {
-      await signInWithEmailAndPassword(auth, 'ajeet9008423323@gmail.com', pass);
-      sessionStorage.setItem('jsg_auth', '1');
+      const cred = await signInWithEmailAndPassword(auth, email, pass);
+      if (cred.user.email !== 'ajeet9008423323@gmail.com') {
+        await signOut(auth);
+        errEl.textContent = 'Owner account nahi hai.';
+        errEl.style.display = 'block';
+        btn.textContent = 'Login →'; btn.disabled = false;
+        return;
+      }
+      window.jsgCurrentUser = cred.user;
       document.getElementById('dashLoginBox').style.display = 'none';
       document.getElementById('dashContent').style.display = 'block';
       if (window.renderDashboard) window.renderDashboard();
@@ -2071,8 +2081,8 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
   </div>
 </div>
 
-<!-- Client Portal Trigger Button -->
-<button id="clientPortalBtn" onclick="document.getElementById('clientPortalOverlay').style.display='block';document.body.style.overflow='hidden';if(window.jsgCurrentUser){window.jsgCpShowDashboard(window.jsgCurrentUser);}else{document.getElementById('cpAuthBox').style.display='block';document.getElementById('cpDashboard').style.display='none';}" style="position:fixed;bottom:100px;right:12px;background:#C7972C;color:#1A1306;border:none;width:52px;height:52px;border-radius:50%;font-size:20px;cursor:pointer;z-index:8000;box-shadow:0 4px 16px rgba(199,151,44,0.35);-webkit-tap-highlight-color:transparent;" title="Client Portal">👤</button>
+<!-- Client Portal Trigger Button (single login for all) -->
+<button id="clientPortalBtn" onclick="document.getElementById('clientPortalOverlay').style.display='block';document.body.style.overflow='hidden';if(window.jsgCurrentUser){if(window.jsgCurrentUser.email==='ajeet9008423323@gmail.com'){document.getElementById('clientPortalOverlay').style.display='none';document.getElementById('ownerDashOverlay').style.display='block';if(window.jsgLoadFirebaseProjects)window.jsgLoadFirebaseProjects();if(window.jsgLoadClients)window.jsgLoadClients();}else{window.jsgCpShowDashboard(window.jsgCurrentUser);}}else{document.getElementById('cpAuthBox').style.display='block';document.getElementById('cpDashboard').style.display='none';}" style="position:fixed;bottom:100px;right:12px;background:#C7972C;color:#1A1306;border:none;width:52px;height:52px;border-radius:50%;font-size:20px;cursor:pointer;z-index:8000;box-shadow:0 4px 16px rgba(199,151,44,0.35);-webkit-tap-highlight-color:transparent;" title="Login">👤</button>
 
 <!-- ============================= OWNER DASHBOARD ============================= -->
 <div id="ownerDashOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9000;overflow-y:auto;-webkit-overflow-scrolling:touch;">
@@ -2090,10 +2100,10 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
     <div id="dashLoginBox" style="background:#1B2026;border-radius:8px;padding:40px;max-width:360px;margin:60px auto;">
       <h3 style="color:#F4F1E8;margin:0 0 6px;">Owner Login</h3>
       <p style="color:#6B7480;font-size:13px;margin:0 0 24px;">Access restricted to JSG admin only.</p>
-      <div style="margin-bottom:14px;"><input type="password" id="dashPin" placeholder="Enter PIN" style="width:100%;padding:10px 14px;background:#14181D;border:1px solid #3D454D;color:#F4F1E8;border-radius:4px;font-size:15px;box-sizing:border-box;"></div>
-      <div style="margin-bottom:14px;"><input type="password" id="dashOwnerPass" placeholder="Firebase Password" style="width:100%;padding:10px 14px;background:#14181D;border:1px solid #3D454D;color:#F4F1E8;border-radius:4px;font-size:15px;box-sizing:border-box;"></div>
+      <div style="margin-bottom:14px;"><input type="email" id="dashOwnerEmail" placeholder="Owner Email" style="width:100%;padding:10px 14px;background:#14181D;border:1px solid #3D454D;color:#F4F1E8;border-radius:4px;font-size:15px;box-sizing:border-box;"></div>
+      <div style="margin-bottom:14px;"><input type="password" id="dashOwnerPass" placeholder="Password" style="width:100%;padding:10px 14px;background:#14181D;border:1px solid #3D454D;color:#F4F1E8;border-radius:4px;font-size:15px;box-sizing:border-box;"></div>
       <button id="dashLoginBtn" onclick="window.jsgOwnerLogin()" style="width:100%;padding:11px;background:#C7972C;color:#1A1306;border:none;border-radius:4px;font-weight:700;font-size:15px;cursor:pointer;">Login →</button>
-      <p id="dashLoginErr" style="color:#E05050;font-size:12px;margin:10px 0 0;display:none;">Wrong PIN or password. Try again.</p>
+      <p id="dashLoginErr" style="color:#E05050;font-size:12px;margin:10px 0 0;display:none;">Login failed. Check email and password.</p>
     </div>
 
     <!-- Dashboard Content (hidden until login) -->
@@ -2194,7 +2204,7 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
 </div>
 
 <!-- Owner Dashboard Trigger Button (hidden small button) -->
-<button id="ownerDashBtn" onclick="var o=document.getElementById('ownerDashOverlay');o.style.display='block';document.body.style.overflow='hidden';document.getElementById('dashLoginBox').style.display='block';document.getElementById('dashContent').style.display='none';" title="Owner Dashboard" style="position:fixed;bottom:160px;left:12px;background:#14181D;border:1px solid #3D454D;color:#6B7480;width:44px;height:44px;border-radius:50%;font-size:18px;cursor:pointer;z-index:8000;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;">⚙</button>
+<!-- Owner dashboard accessed via login only -->
 
 <!-- ============================= FLOATING BUTTONS ============================= -->
 <div class="floating">
