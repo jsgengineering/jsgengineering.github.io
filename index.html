@@ -661,12 +661,13 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
   };
 
   // LOGIN
-  document.getElementById('cpLoginBtn').addEventListener('click', async function() {
+  window.jsgDoLogin = async function() {
+    const btn = document.getElementById('cpLoginBtn');
     const email = document.getElementById('cpLoginEmail').value.trim();
     const pass = document.getElementById('cpLoginPassword').value;
     const errEl = document.getElementById('cpLoginErr');
     errEl.style.display = 'none';
-    this.textContent = 'Logging in...'; this.disabled = true;
+    btn.textContent = 'Logging in...'; btn.disabled = true;
     try {
       const cred = await signInWithEmailAndPassword(auth, email, pass);
       window.jsgCurrentUser = cred.user;
@@ -676,8 +677,8 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
       errEl.textContent = e.code === 'auth/invalid-credential' ? 'Wrong email or password.' : e.message;
       errEl.style.display = 'block';
     }
-    this.textContent = 'Login →'; this.disabled = false;
-  });
+    btn.textContent = 'Login →'; btn.disabled = false;
+  };
 
   // SIGNUP
   document.getElementById('cpSignupBtn').addEventListener('click', async function() {
@@ -1846,7 +1847,7 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
           <label style="display:block;font-size:12px;color:#6B7480;margin-bottom:6px;">Password</label>
           <input type="password" id="cpLoginPassword" placeholder="••••••••" style="width:100%;padding:10px 14px;background:#14181D;border:1px solid #3D454D;color:#F4F1E8;border-radius:4px;font-size:14px;box-sizing:border-box;">
         </div>
-        <button id="cpLoginBtn" style="width:100%;padding:12px;background:#C7972C;color:#1A1306;border:none;border-radius:4px;font-weight:700;font-size:15px;cursor:pointer;">Login →</button>
+        <button id="cpLoginBtn" onclick="window.jsgDoLogin()" style="width:100%;padding:12px;background:#C7972C;color:#1A1306;border:none;border-radius:4px;font-weight:700;font-size:15px;cursor:pointer;">Login →</button>
         <p id="cpLoginErr" style="color:#E05050;font-size:12px;margin:10px 0 0;display:none;"></p>
       </div>
 
