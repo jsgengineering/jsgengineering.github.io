@@ -608,25 +608,27 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
   window.jsgAuth = auth;
   window.jsgDb = db;
 
-  // Show dashboard after login
+  // Show dashboard after login (used by onAuthStateChanged)
   window.jsgCpShowDashboard = async function(user, nameOverride) {
-    alert('DASHBOARD CALLED — uid: ' + user.uid);
-    document.getElementById('cpAuthBox').style.display = 'none';
-    document.getElementById('cpDashboard').style.display = 'block';
+    const authBox = document.getElementById('cpAuthBox');
+    const dashboard = document.getElementById('cpDashboard');
+    if (authBox) authBox.style.display = 'none';
+    if (dashboard) dashboard.style.display = 'block';
     let displayName = nameOverride || user.email;
     try {
       const clientDoc = await getDoc(doc(db, 'clients', user.uid));
       if (clientDoc.exists()) displayName = clientDoc.data().name || displayName;
-      document.getElementById('cpUserName').textContent = displayName;
+      const nameEl = document.getElementById('cpUserName');
+      if (nameEl) nameEl.textContent = displayName;
 
       const projectsEl = document.getElementById('cpProjectsList');
       const noProj = document.getElementById('cpNoProjects');
+      if (!projectsEl) return;
       const q = query(collection(db, 'projects'), where('clientUid', '==', user.uid));
       const snap = await getDocs(q);
-      alert('DEBUG — user.uid: ' + user.uid + ' | docs found: ' + snap.size);
 
-      if (snap.empty) { noProj.style.display = 'block'; return; }
-      noProj.style.display = 'none';
+      if (snap.empty) { if (noProj) noProj.style.display = 'block'; return; }
+      if (noProj) noProj.style.display = 'none';
 
       const statusColors = { running:'#4A90D9', completed:'#5B8F5B', pending:'#C7972C', cancelled:'#E05050' };
       const statusLabels = { running:'🔵 In Progress', completed:'✅ Completed', pending:'⏳ Pending', cancelled:'❌ Cancelled' };
@@ -655,9 +657,9 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
       });
       projectsEl.innerHTML = html;
     } catch(e) {
-      document.getElementById('cpUserName').textContent = displayName;
+      const nameEl2 = document.getElementById('cpUserName');
+      if (nameEl2) nameEl2.textContent = displayName;
       console.error('Portal error:', e);
-      alert('Portal error: ' + e.message + ' | Code: ' + e.code);
     }
   };
 
