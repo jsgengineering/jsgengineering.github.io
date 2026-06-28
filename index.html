@@ -622,6 +622,7 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
       const noProj = document.getElementById('cpNoProjects');
       const q = query(collection(db, 'projects'), where('clientUid', '==', user.uid));
       const snap = await getDocs(q);
+      alert('DEBUG — user.uid: ' + user.uid + ' | docs found: ' + snap.size);
 
       if (snap.empty) { noProj.style.display = 'block'; return; }
       noProj.style.display = 'none';
