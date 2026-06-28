@@ -1896,7 +1896,7 @@ footer{background:var(--ink);border-top:1px solid var(--steel-line);padding:70px
 </div>
 
 <!-- Client Portal Trigger Button -->
-<button id="clientPortalBtn" onclick="document.getElementById('clientPortalOverlay').style.display='block';document.body.style.overflow='hidden';if(window.jsgCurrentUser){jsgCpShowDashboard(window.jsgCurrentUser);}" style="position:fixed;bottom:100px;right:12px;background:#C7972C;color:#1A1306;border:none;width:52px;height:52px;border-radius:50%;font-size:20px;cursor:pointer;z-index:8000;box-shadow:0 4px 16px rgba(199,151,44,0.35);-webkit-tap-highlight-color:transparent;" title="Client Portal">👤</button>
+<button id="clientPortalBtn" onclick="document.getElementById('clientPortalOverlay').style.display='block';document.body.style.overflow='hidden';if(window.jsgCurrentUser){window.jsgCpShowDashboard(window.jsgCurrentUser);}else{document.getElementById('cpAuthBox').style.display='block';document.getElementById('cpDashboard').style.display='none';}" style="position:fixed;bottom:100px;right:12px;background:#C7972C;color:#1A1306;border:none;width:52px;height:52px;border-radius:50%;font-size:20px;cursor:pointer;z-index:8000;box-shadow:0 4px 16px rgba(199,151,44,0.35);-webkit-tap-highlight-color:transparent;" title="Client Portal">👤</button>
 
 <!-- ============================= OWNER DASHBOARD ============================= -->
 <div id="ownerDashOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9000;overflow-y:auto;-webkit-overflow-scrolling:touch;">
